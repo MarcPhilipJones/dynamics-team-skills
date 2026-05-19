@@ -1,0 +1,49 @@
+# Secrets & credentials — never commit these
+.env
+.env.*
+*.env
+.zava-env
+*.pat
+*-token*
+*-secret*
+secrets.json
+keys/
+private-key*
+*.pem
+*.pfx
+*.cer
+
+# Skills authoring scratch / quarantine
+_to-review/
+*.draft.md
+*.scratch.md
+.last-sync
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/settings.json
+.idea/
+
+# Build / dependency output (defensive — no build pipeline yet)
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+.cache/
+
+# Python (some skills bundle helper scripts)
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Office temp / lock files
+~$*
+.~lock.*
