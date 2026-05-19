@@ -28,6 +28,7 @@ desktop.ini
 *~
 .vscode/settings.json
 .idea/
+.specstory/
 
 # Build / dependency output (defensive — no build pipeline yet)
 node_modules/
