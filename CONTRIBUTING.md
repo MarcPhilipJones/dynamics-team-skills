@@ -89,6 +89,68 @@ reviewer. The cadence:
 Don't let perfect be the enemy of good — a sanitised, slightly-rough skill is
 more valuable than a polished one that never gets shared.
 
+## Branching & PR workflow
+
+`main` is protected — all changes go through a pull request. Use a short-lived
+branch per skill so reviews stay scoped and the history stays readable.
+
+### Branch naming
+
+| Prefix | Use for | Example |
+|---|---|---|
+| `harvest/` | A brand-new skill being added | `harvest/case-routing-rules` |
+| `update/` | Editing an existing skill (bug fix, version bump, clarification) | `update/setup-webapi-v1.2` |
+| `chore/` | Repo plumbing: gitignore, README, CONTRIBUTING, INDEX-only changes | `chore/fix-index-typo` |
+| `docs/` | Pure documentation changes outside `skills/` | `docs/readme-disclaimer` |
+
+Branch leaf names are kebab-case and match the skill folder where applicable.
+
+### Full flow for a new skill
+
+```pwsh
+# 1. Start clean from main
+git checkout main
+git pull --ff-only origin main
+
+# 2. Create the harvest branch
+git checkout -b harvest/<skill-name>
+
+# 3. Add files under skills/<category>/<skill-name>/SKILL.md
+#    Update skills/INDEX.md
+
+# 4. Pre-commit safety
+#    Run BOTH workspace tasks before pushing:
+#    - "Scan for tenant leaks (should print nothing)"   → must be empty
+#    - "Count skills by category"                       → sanity check the +1
+
+# 5. Commit & push
+git add skills/<category>/<skill-name>/ skills/INDEX.md
+git commit -m "harvest: add <skill-name> skill"
+git push -u origin harvest/<skill-name>
+
+# 6. Open the PR
+gh pr create --fill --base main
+```
+
+### Commit message convention
+
+Match the branch prefix to the commit verb:
+
+- `harvest: add <skill-name> skill`
+- `update: <skill-name> v1.2.0 — <one-line reason>`
+- `chore: <what>`
+- `docs: <what>`
+
+### Bypass policy
+
+Marc has bypass permission on the `main` protection rule. Use it only for:
+
+- `.gitignore` / repo plumbing that cannot block a harvest in flight
+- Emergency tenant-leak redaction (sanitise immediately, no review delay)
+
+Everything else — including all `harvest/` and `update/` changes — goes
+through a PR, even when you're the only reviewer. The audit trail matters.
+
 ## PR checklist
 
 The PR template enforces these — see [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md):
