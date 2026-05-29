@@ -64,6 +64,7 @@ author: Marc
 | [elite-powerpoint](general/elite-powerpoint/SKILL.md) | "build a PowerPoint", "create a deck", "presentation", "slides", "pitch deck", "restyle the pptx", "Fluent 2 deck", "D365 template" | Editable, professional decks via python-pptx + D365 template + Fluent 2 design tokens, with mandatory visual self-check loop |
 | [elite-powerpoint-designer](general/elite-powerpoint-designer/SKILL.md) | "design a deck", "brand style", "slide design philosophy", "animation guidelines", "presentation style" | Generic design-philosophy framework: brand styles, template mapping, animation/transition guidelines, polish heuristics |
 | [image-selection-guidance](general/image-selection-guidance/SKILL.md) | "pick an image", "find a photo", "hero image", "stock image", "slide visual" | Curate stock images for slides: Unsplash vs Pexels decision logic, intelligent search, quality standards |
+| [brand-central](general/brand-central/SKILL.md) | "find a Microsoft logo", "Brand Central", "product icon", "official Microsoft asset", "Copilot icon", "M365 icon", "Dynamics icon", "Azure icon", "branded hero image" | Navigate brandcentral.microsoft.com to source on-brand Microsoft visuals: asset selection by surface, format decision (SVG/PNG/EPS), usage rights, integration into decks / Power Pages / Code Apps |
 
 ## PowerPoint Skills
 
