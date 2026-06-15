@@ -66,6 +66,7 @@ author: Marc
 | [image-selection-guidance](general/image-selection-guidance/SKILL.md) | "pick an image", "find a photo", "hero image", "stock image", "slide visual" | Curate stock images for slides: Unsplash vs Pexels decision logic, intelligent search, quality standards |
 | [project-manager-add-workspace](general/project-manager-add-workspace/SKILL.md) | "add workspace to project manager", "register this workspace", "save workspace in project manager" | Add current VS Code workspace to Project Manager saved projects with duplicate protection and no mutation of existing entries |
 | [figma-design-extraction](general/figma-design-extraction/SKILL.md) | "extract the Figma", "rebuild this design", "Figma to code", "Figma MCP", "get the design tokens", "Dev Mode MCP not showing" | Extract a Figma design (tokens, assets, layout) via Dev Mode MCP or the REST fallback and rebuild it as a coded SPA for a demo |
+| [brand-central](general/brand-central/SKILL.md) | "find a Microsoft logo", "Brand Central", "product icon", "official Microsoft asset", "Copilot icon", "M365 icon", "Dynamics icon", "Azure icon", "branded hero image" | Navigate brandcentral.microsoft.com to source on-brand Microsoft visuals: asset selection by surface, format decision (SVG/PNG/EPS), usage rights, integration into decks / Power Pages / Code Apps |
 
 ## PowerPoint Skills
 
