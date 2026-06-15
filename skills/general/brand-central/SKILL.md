@@ -1,6 +1,16 @@
 ---
 name: brand-central
 description: Source on-brand Microsoft visual assets from Brand Central (brandcentral.microsoft.com) for demos, decks, web artifacts, Power Pages, and Code Apps. Use when the user asks to "find a Microsoft logo", mentions "Brand Central", needs a "product icon", "official Microsoft asset", "Copilot icon", "M365 icon", "Dynamics icon", "Azure icon", a "branded hero image", or a "demo screenshot" with Microsoft branding. Covers navigation, search, asset selection by use-case, file-format decision logic, usage and attribution rules, and integration patterns into common deliverables.
+version: 1.0.0
+author: Grant Readings
+applyTo: ""
+tags:
+  - brand-central
+  - microsoft-assets
+  - logos
+  - icons
+  - design
+  - demo
 ---
 
 # Brand Central
