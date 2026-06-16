@@ -37,7 +37,7 @@ tags:
 >   CLI evolution: `pac code` → `npx power-apps` → global **`power-apps`** command.
 > - **Latest package version is `@microsoft/power-apps@1.2.2`** (June 2026). The
 >   GitHub starter templates still pin `^1.0.3` — **bump to `^1.2.2` after scaffolding**
->   (see [Known Issues](#known-issues--version-gotchas)).
+>   (see [Known Issues](#16-known-issues--version-gotchas)).
 > - The AI assistant plugin (Claude / GitHub Copilot) moved to
 >   [microsoft/power-platform-skills](https://github.com/microsoft/power-platform-skills).
 
@@ -60,8 +60,8 @@ tags:
 13. [Deployment & ALM](#13-deployment--alm)
 14. [Common Patterns & Best Practices](#14-common-patterns--best-practices)
 15. [Troubleshooting](#15-troubleshooting)
-16. [Known Issues & Version Gotchas](#known-issues--version-gotchas)
-17. [Quick Command Reference](#16-quick-command-reference)
+16. [Known Issues & Version Gotchas](#16-known-issues--version-gotchas)
+17. [Quick Command Reference](#17-quick-command-reference)
 
 ---
 
@@ -291,7 +291,7 @@ ctx.host.sessionId; // Session ID (changes each open)
 > **Now supported (previously listed as limitations — corrected June 2026):**
 >
 > - **Power Apps mobile** — code apps now run on mobile (an Android layout bug is
->   being fixed; see [Known Issues](#known-issues--version-gotchas)).
+>   being fixed; see [Known Issues](#16-known-issues--version-gotchas)).
 > - **Dataverse actions & functions** — see [Add a Dataverse action or function](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-dataverse-action-function)
 >   (`power-apps find-dataverse-api`).
 > - **Power Automate flows** — see [Add flows](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-flows).
@@ -951,7 +951,7 @@ Append `?hideNavBar=true` to the app URL.
 - Manual export/import still required for cross-environment moves
 - **Solution movement has known bugs** — e.g. errors on solution *unpack* with
   code apps, and `add-data-source` can drop existing connector entries from
-  `dataSourcesInfo.ts`. See [Known Issues](#known-issues--version-gotchas).
+  `dataSourcesInfo.ts`. See [Known Issues](#16-known-issues--version-gotchas).
 
 ---
 
@@ -1068,7 +1068,7 @@ useEffect(() => {
 
 ---
 
-## Known Issues & Version Gotchas
+## 16. Known Issues & Version Gotchas
 
 > Verified against the [PowerAppsCodeApps repo issues](https://github.com/microsoft/PowerAppsCodeApps/issues) and Microsoft Learn, June 2026.
 
@@ -1101,7 +1101,7 @@ useEffect(() => {
 
 ---
 
-## 16. Quick Command Reference
+## 17. Quick Command Reference
 
 ```powershell
 # ── Project Setup (NEW power-apps npm CLI — recommended) ──
