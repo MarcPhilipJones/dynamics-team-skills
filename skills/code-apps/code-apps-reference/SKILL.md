@@ -5,8 +5,9 @@ description: >
   Apps with Dataverse connectivity and Microsoft Fluent UI v9. Use when scaffolding
   a Code App, connecting to Dataverse, adding connectors, querying via OData/FetchXML,
   CRUD operations, bulk ops, Power Apps Search, column-level security, Fluent UI
-  patterns, deployment/ALM, or troubleshooting Code App issues.
-version: 1.0.0
+  patterns, deployment/ALM (new `power-apps` npm CLI or legacy `pac code`), or
+  troubleshooting Code App issues.
+version: 2.0.0
 author: Marc
 tags:
   - power-apps
@@ -21,9 +22,24 @@ tags:
 
 # Power Apps Code Apps — Skill Guide
 
+> **v2.0.0 — GA + new `power-apps` npm CLI, version/known-issue corrections (June 2026)**
+
 > **Comprehensive reference for building, extending, and deploying Power Apps Code Apps with Dataverse connectivity and Microsoft Fluent UI.**
 >
-> Source: Microsoft Learn — [Power Apps Developer Data Platform](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/) (extracted March 2026, 400+ pages)
+> Source: Microsoft Learn — [Power Apps Code Apps](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/) + [Data Platform](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/) (verified June 2026)
+
+> **⚡ Status & tooling (June 2026):**
+>
+> - **Code Apps are Generally Available (GA).** They are no longer in preview.
+> - **New `power-apps` npm CLI is now the recommended tooling.** Shipped inside the
+>   `@microsoft/power-apps` package (v1.0.4+), it replaces the Power Platform CLI's
+>   `pac code` commands, which are **deprecated and will be removed in a future release**.
+>   CLI evolution: `pac code` → `npx power-apps` → global **`power-apps`** command.
+> - **Latest package version is `@microsoft/power-apps@1.2.2`** (June 2026). The
+>   GitHub starter templates still pin `^1.0.3` — **bump to `^1.2.2` after scaffolding**
+>   (see [Known Issues](#16-known-issues--version-gotchas)).
+> - The AI assistant plugin (Claude / GitHub Copilot) moved to
+>   [microsoft/power-platform-skills](https://github.com/microsoft/power-platform-skills).
 
 ---
 
@@ -44,7 +60,8 @@ tags:
 13. [Deployment & ALM](#13-deployment--alm)
 14. [Common Patterns & Best Practices](#14-common-patterns--best-practices)
 15. [Troubleshooting](#15-troubleshooting)
-16. [Quick Command Reference](#16-quick-command-reference)
+16. [Known Issues & Version Gotchas](#16-known-issues--version-gotchas)
+17. [Quick Command Reference](#17-quick-command-reference)
 
 ---
 
@@ -97,18 +114,36 @@ tags:
 
 ### Required Software
 
-| Tool                 | Version   | Purpose                    |
-| -------------------- | --------- | -------------------------- |
-| **Node.js**          | LTS (20+) | JavaScript runtime         |
-| **Git**              | Latest    | Version control            |
-| **VS Code**          | Latest    | IDE                        |
-| **PAC CLI**          | Latest    | Power Platform CLI (`pac`) |
-| **Azure CLI** (opt.) | Latest    | For Azure operations       |
+| Tool                       | Version   | Purpose                                                    |
+| -------------------------- | --------- | ---------------------------------------------------------- |
+| **Node.js**                | LTS (20+) | JavaScript runtime                                         |
+| **Git**                    | Latest    | Version control                                            |
+| **VS Code**                | Latest    | IDE                                                        |
+| **`@microsoft/power-apps`** | 1.2.2+    | Power Apps client library **+ new `power-apps` npm CLI**   |
+| **PAC CLI** (legacy)       | Latest    | Power Platform CLI (`pac code` — **deprecating**)          |
+| **Azure CLI** (opt.)       | Latest    | For Azure operations                                       |
 
-### PAC CLI Authentication
+> **CLI evolution — which command do I use?**
+>
+> | Era | Command | Status |
+> | --- | ------- | ------ |
+> | Original | `pac code init / add-data-source / push` | **Deprecated** — still works for now |
+> | Transitional | `npx power-apps <cmd>` | Works (runs the package CLI without global install) |
+> | **Current (recommended)** | `power-apps <cmd>` (global install) | ✅ Use this |
+>
+> The new npm CLI ships in `@microsoft/power-apps` v1.0.4+ and has four commands:
+> `init`, `run`, `push`, `find-dataverse-api`. Data-source management
+> (`add-data-source`, `list-datasets`, etc.) is still performed via `pac code`
+> until those move to the npm CLI.
+
+### Power Apps CLI Authentication
+
+The new `power-apps` CLI authenticates you automatically on `power-apps init`
+(sign in with your Power Platform account when prompted). For data-source
+commands that still use `pac`, authenticate as below:
 
 ```powershell
-# Authenticate to your Power Platform environment
+# Authenticate to your Power Platform environment (pac — for add-data-source etc.)
 pac auth create --url https://<your-org>.crm.dynamics.com
 
 # Or use existing auth profile
@@ -129,17 +164,39 @@ pac env select --environment <environment-id>
 
 ### First-Time Project Setup
 
+**Recommended — scaffold from an official template, then use the `power-apps` npm CLI:**
+
+```powershell
+# 1. Scaffold from a Microsoft template (starter = React + Vite + Tailwind +
+#    Tanstack Query + React Router; vite = minimal React + Vite)
+npx degit microsoft/PowerAppsCodeApps/templates/starter#main my-app
+cd my-app
+
+# 2. IMPORTANT: the template still pins @microsoft/power-apps ^1.0.3 — bump it
+npm install @microsoft/power-apps@latest
+
+# 3. Install the CLI globally + remaining dependencies
+npm install -g @microsoft/power-apps   # provides the `power-apps` command
+npm install
+
+# 4. Initialise the code app (authenticates automatically; interactive or flags)
+power-apps init                                                  # interactive
+# power-apps init --display-name "<Your App Name>" --environment-id <env-id>
+
+# 5. Add Dataverse table(s) as data source(s) — still via pac code for now
+pac code add-data-source -a dataverse -t <table-logical-name>
+
+# 6. Run locally
+npm run dev
+```
+
+**Legacy (deprecated `pac code`) flow — still functional:**
+
 ```powershell
 cd <your-app-folder>
 npm install
-
-# Initialise the code app in Power Platform
-pac code init --displayname "<Your App Name>"
-
-# Add Dataverse table(s) as data source(s)
+pac code init --displayName "<Your App Name>"
 pac code add-data-source -a dataverse -t <table-logical-name>
-
-# Run locally
 npm run dev
 ```
 
@@ -177,6 +234,13 @@ npm run dev
             └── <Table>Service.ts # CRUD methods for each table
 ```
 
+> **Template note:** Two official templates exist. The **`starter`** template
+> (recommended) ships with React, Vite, **Tailwind CSS**, Radix UI, Tanstack
+> Query, and React Router. The **`vite`** template is a minimal React + Vite
+> setup. The Fluent UI v9 patterns in this guide map to the **`FluentSample`**
+> sample app — if you scaffold from `starter`, you'll be using Tailwind/Radix
+> rather than Fluent, so adapt the UI sections accordingly.
+
 ---
 
 ## 4. Power Apps Code Apps — How It Works
@@ -212,15 +276,26 @@ ctx.user.userPrincipalName; // UPN (e.g. user@contoso.com)
 ctx.host.sessionId; // Session ID (changes each open)
 ```
 
-### Current Limitations (as of March 2026)
+### Current Limitations (GA — verified June 2026)
 
+- No Storage Shared Access Signature (SAS) IP restriction support
 - No Power Platform Git integration (yet)
-- Not supported in Power Apps mobile or Power Apps for Windows
-- No Power BI data integration
-- No SharePoint forms integration
-- No solution packager support
-- Dataverse: no polymorphic lookups, actions/functions, FetchXML, alternate keys (via SDK)
-- Chrome/Edge may block localhost requests — users grant Local Network Access during dev
+- Not supported in **Power Apps for Windows**
+- No Power BI **data** integration (`PowerBIIntegration` function) — but a code app
+  **can be embedded in Power BI reports** via the Power Apps Visual
+- No SharePoint **forms** integration (SharePoint data operations *are* supported)
+- Service Principals (SPN) cannot create or become owners of code apps
+- Chrome/Edge block localhost requests by default (since Dec 2025) — grant Local
+  Network Access during dev, or use `allow="local-network-access"` on iframes
+
+> **Now supported (previously listed as limitations — corrected June 2026):**
+>
+> - **Power Apps mobile** — code apps now run on mobile (an Android layout bug is
+>   being fixed; see [Known Issues](#16-known-issues--version-gotchas)).
+> - **Dataverse actions & functions** — see [Add a Dataverse action or function](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-dataverse-action-function)
+>   (`power-apps find-dataverse-api`).
+> - **Power Automate flows** — see [Add flows](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-flows).
+> - **Azure SQL, SharePoint operations, and Copilot Studio** connections.
 
 ---
 
@@ -302,6 +377,15 @@ pac code list-tables -a <apiId> -c <connectionId> -d <datasetName>
 # Delete a data source (no refresh command — delete and re-add)
 pac code delete-data-source -a "shared_sql" -ds "TableName"
 ```
+
+> **Actions & functions:** To call a Dataverse action or function, use the new
+> npm CLI's `power-apps find-dataverse-api` command to discover and generate the
+> typed wrapper. See [Add a Dataverse action or function](https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-dataverse-action-function).
+>
+> **Caution (issue [#366](https://github.com/microsoft/PowerAppsCodeApps/issues/366)):**
+> re-running `add-data-source` can drop existing connector entries (e.g.
+> `shared_logicflows`) from `src/generated/dataSourcesInfo.ts`. Back up that file
+> before adding new sources.
 
 ### Connection References (for ALM portability)
 
@@ -797,10 +881,11 @@ Before running `pac code push`, verify all prerequisites:
 | Node.js LTS                | `node --version`              | v20+ (tested with v24.13.0)                |
 | npm                        | `npm --version`               | v9+ (tested with v11.6.2)                  |
 | Git                        | `git --version`               | Any recent version                         |
-| PAC CLI                    | `pac auth list`               | Active profile on target environment       |
+| PAC CLI / power-apps        | `pac auth list`              | Active profile on target environment       |
 | Active environment         | `pac env who`                 | Must match `environmentId` in power.config |
 | `power.config.json` exists | `Test-Path power.config.json` | True                                       |
 | Dependencies installed     | `Test-Path node_modules`      | True (run `npm install` if not)            |
+| `@microsoft/power-apps` 1.2.2+ | `npm ls @microsoft/power-apps` | Not pinned to old 1.0.3                  |
 | TypeScript compiles        | `npx tsc -b`                  | No errors                                  |
 | Vite build succeeds        | `npm run build`               | `dist/` folder created                     |
 
@@ -810,23 +895,28 @@ Before running `pac code push`, verify all prerequisites:
 # Build the production bundle
 npm run build
 
-# Deploy to Power Platform (specify your solution)
+# Deploy to Power Platform — NEW npm CLI (recommended)
+power-apps push
+
+# Legacy (deprecated) — still works
 pac code push --solutionName <YourSolution>
 
 # Combined build + deploy (if configured in package.json)
-npm run deploy    # runs: npm run build && pac code push
+npm run deploy    # e.g. runs: npm run build && power-apps push
 ```
 
 ### First Publish Behaviour
 
-On the first `pac code push` (when `appId` is `null` in `power.config.json`):
+On the first push (when `appId` is `null` in `power.config.json`):
 
-1. PAC creates a **new Code App** in the target environment
+1. The CLI creates a **new Code App** in the target environment
 2. Assigns a new `appId` GUID
 3. **Automatically updates `power.config.json`** with the new `appId` — no manual edit needed
 4. Subsequent pushes update the same app rather than creating duplicates
 
-> **Note**: The first push may show a transient `CodePushMakeSolutionAwareErrorMessage` error and retry automatically — this is normal and the push succeeds on retry.
+> **Note**: An early `pac code push` may show a transient
+> `CodePushMakeSolutionAwareErrorMessage` error and retry automatically — this is
+> normal and the push succeeds on retry.
 
 ### Adding to a Solution
 
@@ -857,9 +947,11 @@ Append `?hideNavBar=true` to the app URL.
 
 ### Current ALM Limitations
 
-- No solution packager support
 - No source code integration with Power Platform Git
-- Manual export/import required
+- Manual export/import still required for cross-environment moves
+- **Solution movement has known bugs** — e.g. errors on solution *unpack* with
+  code apps, and `add-data-source` can drop existing connector entries from
+  `dataSourcesInfo.ts`. See [Known Issues](#16-known-issues--version-gotchas).
 
 ---
 
@@ -948,7 +1040,7 @@ useEffect(() => {
 | Error                                     | Cause                                  | Fix                                                    |
 | ----------------------------------------- | -------------------------------------- | ------------------------------------------------------ |
 | `Cannot find module '../generated/...'`   | `pac code add-data-source` not run yet | Run `pac code add-data-source -a dataverse -t <table>` |
-| `powerApps() plugin error`                | `power.config.json` missing            | Run `pac code init --displayname "<App Name>"`         |
+| `powerApps() plugin error`                | `power.config.json` missing            | Run `power-apps init` (or legacy `pac code init`)      |
 | `Module not found: @microsoft/power-apps` | npm packages not installed             | Run `npm install`                                      |
 | `Chrome blocks localhost`                 | Local Network Access permission        | User must grant access when prompted                   |
 
@@ -976,26 +1068,60 @@ useEffect(() => {
 
 ---
 
-## 16. Quick Command Reference
+## 16. Known Issues & Version Gotchas
+
+> Verified against the [PowerAppsCodeApps repo issues](https://github.com/microsoft/PowerAppsCodeApps/issues) and Microsoft Learn, June 2026.
+
+### Version pinning (do this on every new app)
+
+- **Starter templates ship outdated.** Both `templates/starter` and
+  `templates/vite` pin `@microsoft/power-apps` at **`^1.0.3`**, but the latest
+  stable is **`1.2.2`**. Run `npm install @microsoft/power-apps@latest` right
+  after scaffolding — the old pin misses critical fixes.
+- `@microsoft/power-apps-vite` latest is **`1.0.2`** (the template pin is current here).
+- **The Code Apps plugin reports version `1.0.0` and does not appear to
+  auto-update.** Don't rely on automatic patches — update packages manually and
+  reinstall the CLI (`npm install -g @microsoft/power-apps@latest`).
+
+### Open repository issues to be aware of
+
+| Area                 | Issue                                                                            | Notes                                                                                |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Mobile (Android)** | [#364](https://github.com/microsoft/PowerAppsCodeApps/issues/364) iframe `100vh` | Android nav bar overlaps bottom content; fix in progress by MS                       |
+| **Mobile (iOS)**     | [#373](https://github.com/microsoft/PowerAppsCodeApps/issues/373)                | Crash on Power Apps mobile (iOS) — `platformSpecificResourcesVersion` undefined       |
+| **ALM / solutions**  | [#369](https://github.com/microsoft/PowerAppsCodeApps/issues/369)                | Errors unpacking solutions containing code apps                                       |
+| **Connector gen.**   | [#366](https://github.com/microsoft/PowerAppsCodeApps/issues/366)                | `add-data-source` drops existing `shared_logicflows` entry from `dataSourcesInfo.ts` |
+| **Connector gen.**   | [#348](https://github.com/microsoft/PowerAppsCodeApps/issues/348) / [#352](https://github.com/microsoft/PowerAppsCodeApps/issues/352) | SharePoint (`AADSTS65002`) and SQL `@envvar:` data-source failures                   |
+| **Modelling**        | [#365](https://github.com/microsoft/PowerAppsCodeApps/issues/365)                | Cannot create N:N (many-to-many) relations via tooling                               |
+
+> Mitigations: pin `@microsoft/power-apps@1.2.2`, back up `dataSourcesInfo.ts`
+> before running `add-data-source`, and prefer the maker portal UI for adding
+> code apps to solutions (see [§13 ALM](#13-deployment--alm)). Check the repo's
+> **Closed** issues tab — several of these may already be fixed by the time you read this.
+
+---
+
+## 17. Quick Command Reference
 
 ```powershell
-# ── Project Setup ────────────────────────────────
-npm install                                       # Install dependencies
-pac auth create --url https://org.crm4...         # Auth to Power Platform
-pac code init --displayname "<App Name>"          # Init code app
-pac code add-data-source -a dataverse -t <table>  # Add Dataverse table
+# ── Project Setup (NEW power-apps npm CLI — recommended) ──
+npx degit microsoft/PowerAppsCodeApps/templates/starter#main my-app  # scaffold
+npm install @microsoft/power-apps@latest          # bump from pinned 1.0.3 -> 1.2.2
+npm install -g @microsoft/power-apps              # install the `power-apps` CLI
+npm install                                       # install dependencies
+power-apps init                                   # init (auto-auth; or --display-name / --environment-id)
+pac code add-data-source -a dataverse -t <table>  # add Dataverse table (still via pac)
 
 # ── Development ──────────────────────────────────
-npm run dev                                  # Start local dev server
+npm run dev                                  # Local dev server (power-apps run)
 npm run lint                                 # Run ESLint
-npm run build                                # Production build
+npm run build                                # Production build (tsc -b && vite build)
 
 # ── Deployment ───────────────────────────────────
-npm run deploy                               # Build + pac code push
-pac code push                                # Deploy to Power Platform
-pac code push --solutionName <Solution>      # Deploy to specific solution
+power-apps push                              # Deploy (NEW CLI, recommended)
+pac code push --solutionName <Solution>      # Deploy (legacy, deprecated)
 
-# ── Data Source Management ───────────────────────
+# ── Data Source Management (pac code — deprecating) ──
 pac code add-data-source -a dataverse -t <table>       # Add Dataverse table
 pac code delete-data-source -a dataverse -ds <ds>      # Remove a data source
 pac connection list                                     # List connections
@@ -1013,8 +1139,13 @@ pac solution list                            # List solutions
 | Resource                         | URL                                                                                          |
 | -------------------------------- | -------------------------------------------------------------------------------------------- |
 | **Data Platform Developer Docs** | https://learn.microsoft.com/en-us/power-apps/developer/data-platform/                        |
-| **Code Apps Overview**           | https://learn.microsoft.com/en-gb/power-apps/developer/code-apps/overview                    |
-| **Connect to Dataverse**         | https://learn.microsoft.com/en-gb/power-apps/developer/code-apps/how-to/connect-to-dataverse |
+| **Code Apps Docs (home)**        | https://learn.microsoft.com/en-us/power-apps/developer/code-apps/                            |
+| **Code Apps Overview**           | https://learn.microsoft.com/en-us/power-apps/developer/code-apps/overview                    |
+| **npm CLI Quickstart**           | https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/npm-quickstart       |
+| **Add Dataverse action/function**| https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-dataverse-action-function |
+| **Add flows**                    | https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/add-flows            |
+| **Connect to Dataverse**         | https://learn.microsoft.com/en-us/power-apps/developer/code-apps/how-to/connect-to-dataverse |
+| **@microsoft/power-apps (npm)**  | https://www.npmjs.com/package/@microsoft/power-apps                                          |
 | **Fluent UI v9 React**           | https://react.fluentui.dev/                                                                  |
 | **Fluent UI v9 Icons**           | https://react.fluentui.dev/?path=/docs/icons-catalog--docs                                   |
 | **Web API Reference**            | https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/                 |
@@ -1022,4 +1153,7 @@ pac solution list                            # List solutions
 | **Bulk Operations**              | https://learn.microsoft.com/en-us/power-apps/developer/data-platform/bulk-operations         |
 | **Dataverse Search**             | https://learn.microsoft.com/en-us/power-apps/developer/data-platform/search/                 |
 | **Code Apps GitHub Samples**     | https://github.com/microsoft/PowerAppsCodeApps/tree/main/samples                             |
+| **Code Apps Templates**          | https://github.com/microsoft/PowerAppsCodeApps/tree/main/templates                           |
+| **Code Apps Repo Issues**        | https://github.com/microsoft/PowerAppsCodeApps/issues                                        |
+| **AI Assistant Plugin (moved)**  | https://github.com/microsoft/power-platform-skills                                           |
 | **PAC CLI Reference**            | https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction                  |

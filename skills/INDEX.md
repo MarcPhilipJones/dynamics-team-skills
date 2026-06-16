@@ -78,7 +78,7 @@ author: Marc
 
 | Skill | Trigger Phrases | Description |
 |---|---|---|
-| [code-apps-reference](code-apps/code-apps-reference/SKILL.md) | "build a code app", "power apps code app", "pac code init", "add dataverse to code app", "fluent ui v9" | Comprehensive guide: scaffolding, Dataverse + connectors, OData/FetchXML, CRUD, bulk ops, security, Fluent UI v9, ALM, troubleshooting |
+| [code-apps-reference](code-apps/code-apps-reference/SKILL.md) | "build a code app", "power apps code app", "power-apps init", "pac code deprecated", "add dataverse to code app", "fluent ui v9" | Comprehensive guide (GA, new `power-apps` npm CLI): scaffolding, Dataverse + connectors, OData/FetchXML, CRUD, bulk ops, security, Fluent UI v9, ALM, known issues, troubleshooting |
 
 ## Azure Skills
 
