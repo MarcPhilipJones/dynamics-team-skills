@@ -49,6 +49,7 @@ author: Marc
 | [knowledge-base-public-links-for-spa](power-platform/knowledge-base-public-links-for-spa/SKILL.md) | "fix KB links", "article detail page", "knowledge base blank screen" | SPA detail route + component for public-facing KB article URLs |
 | [copilot-studio-voice-agent](power-platform/copilot-studio-voice-agent/SKILL.md) | "voice agent debug", "escalation doesn't fire", "GPT silent on handoff", "realtime voice agent" | Runbook for Copilot Studio Realtime Voice agents — escalation, topic vs GPT decomposition, Dataverse MCP edit loop |
 | [copilot-voice-agent-forensics](power-platform/copilot-voice-agent-forensics/SKILL.md) | "voice agent forensics", "conversationtranscript analysis", "voice latency", "why did the bot say that" | End-to-end runbook: headless authoring, runtime forensics (LWI/sessions/queue), transcript analysis, 7-step iteration loop |
+| [teams-phone-cs-setup](power-platform/teams-phone-cs-setup/SKILL.md) | "sync from teams finds nothing", "teams number missing from phone numbers", "provision teams phone for contact center", "outbound call 404 580406" | Provision a Teams Calling Plan number for the D365 Customer Service voice channel: resource account, Entra app, licensing, inbound + outbound troubleshooting |
 
 ## Dataverse Skills
 
