@@ -42,6 +42,7 @@ author: Marc
 
 | Skill | Trigger Phrases | Description |
 |---|---|---|
+| [add-html-tab](power-platform/add-html-tab/SKILL.md) | "add a tab to a form", "embed an HTML page on a form", "add a web resource tab", "do it like the Usage tab" | Add a model-driven form tab hosting a single-page HTML web resource (live-bound to the record), with backup, publish, verify, and rollback |
 | [solution-packager](power-platform/solution-packager/SKILL.md) | "export solution", "import solution", "manage ALM" | Full solution lifecycle: export, unpack, pack, import |
 | [fetchxml-builder](power-platform/fetchxml-builder/SKILL.md) | "build FetchXML", "query Dataverse", "filter records" | Construct FetchXML queries with filters, joins, aggregation |
 | [knowledge-base-article](power-platform/knowledge-base-article/SKILL.md) | "create KB articles", "set up knowledge base" | knowledgearticle CRUD, lifecycle states, Web API + frontend integration |
