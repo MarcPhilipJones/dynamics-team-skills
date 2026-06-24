@@ -4,7 +4,7 @@ description: >
   Use when the user asks to "export a solution", "import a solution",
   "pack a solution", "unpack a solution", "manage ALM", or "solution management".
   Handles the full Dataverse solution lifecycle: export, unpack, pack, import.
-version: 1.0.0
+version: 1.0.1
 author: Marc
 tags:
   - power-platform
@@ -21,6 +21,10 @@ tags:
 Manage the Dataverse solution lifecycle using PAC CLI. This covers exporting
 solutions from environments, unpacking for source control, packing for
 deployment, and importing into target environments.
+
+> **Related (in-repo):** to add a model-driven form tab hosting an HTML web
+> resource (and route the components into a solution you can pack here), use
+> [power-platform/add-html-tab](../add-html-tab/SKILL.md).
 
 ## Prerequisites
 

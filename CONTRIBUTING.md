@@ -32,8 +32,11 @@ GitHub-safe, share-safe, and easy to navigate.
      - <list>
    ---
    ```
-6. **The `name` field matches the folder leaf.** Folder `case-listing/` →
-   `name: case-listing`. No prefixes like `power-pages-case-listing`.
+6. **The `name` field matches the folder leaf**, optionally with the category
+   prefix. Folder `case-listing/` → `name: case-listing` **or**
+   `name: power-pages-case-listing` (the category-prefixed form is the common
+   convention in `power-platform/` and `power-pages/`). Pick one and be
+   consistent within a category — match the sibling skills already there.
 
 ## Adding a new skill
 
@@ -57,7 +60,9 @@ GitHub-safe, share-safe, and easy to navigate.
 ## Naming
 
 - Skill folder name: kebab-case, descriptive, ≤ 40 characters.
-- Skill `name:` field: same as folder name.
+- Skill `name:` field: the folder name, optionally with the category prefix
+  (e.g. `add-html-tab` or `power-platform-add-html-tab`) — match the sibling
+  skills in the same category.
 - Skill `description:` field: includes trigger phrases ("use when…", "fix Y").
 - Skill `tags:` field: lowercase, hyphen-separated, ≤ 6 tags.
 

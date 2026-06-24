@@ -67,6 +67,10 @@ a full backup and rollback path.
 | Create the table itself | `dv-metadata` |
 | Move the change between environments as managed | `dv-solution` (export the solution this skill writes into) |
 
+> **Related (in-repo):** to export/unpack/pack/import the solution this skill
+> writes its components into, use
+> [power-platform/solution-packager](../solution-packager/SKILL.md).
+
 ---
 
 ## Prerequisites — automated preflight (run first, fix friendly)
@@ -323,8 +327,9 @@ Write-Host "    Backed up to $backup" -ForegroundColor DarkGray
 # ---- 2. Create or update the HTML web resource -----------------------------
 Write-Host "==> Upserting web resource '$WebResourceName' (type 1 = HTML)..." -ForegroundColor Cyan
 $content = [Convert]::ToBase64String([IO.File]::ReadAllBytes($HtmlPath))
+$wrNameEsc = $WebResourceName -replace "'", "''"   # escape single quotes for the OData $filter
 $existing = Invoke-RestMethod -Method Get -Headers $headers `
-  -Uri "$api/webresourceset?`$select=webresourceid&`$filter=name eq '$WebResourceName'"
+  -Uri "$api/webresourceset?`$select=webresourceid&`$filter=name eq '$wrNameEsc'"
 if ($existing.value.Count -gt 0) {
   $webResourceId = $existing.value[0].webresourceid
   $body = @{ content = $content; displayname = $DisplayName } | ConvertTo-Json
