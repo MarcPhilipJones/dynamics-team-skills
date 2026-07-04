@@ -50,6 +50,8 @@ author: Marc
 | [knowledge-base-public-links-for-spa](power-platform/knowledge-base-public-links-for-spa/SKILL.md) | "fix KB links", "article detail page", "knowledge base blank screen" | SPA detail route + component for public-facing KB article URLs |
 | [copilot-studio-voice-agent](power-platform/copilot-studio-voice-agent/SKILL.md) | "voice agent debug", "escalation doesn't fire", "GPT silent on handoff", "realtime voice agent" | Runbook for Copilot Studio Realtime Voice agents — escalation, topic vs GPT decomposition, Dataverse MCP edit loop |
 | [copilot-voice-agent-forensics](power-platform/copilot-voice-agent-forensics/SKILL.md) | "voice agent forensics", "conversationtranscript analysis", "voice latency", "why did the bot say that" | End-to-end runbook: headless authoring, runtime forensics (LWI/sessions/queue), transcript analysis, 7-step iteration loop |
+| [flows-via-web-api](power-platform/flows-via-web-api/SKILL.md) | "create a flow via API", "POST /workflows", "flow won't open in the designer", "trigger fires on wrong change type" | Create Dataverse-triggered cloud flows programmatically + gotchas (message codes, operationMetadataId, portal re-registration, team owner role, PVA flows) |
+| [ccaas-outbound-voice-agent](power-platform/ccaas-outbound-voice-agent/SKILL.md) | "AI voice agent to call leads", "outbound qualification calls", "proactive voice", "Copilot Studio voice agent over a phone number" | Outbound AI voice qualification: CCaaS proactive voice + Copilot Studio agent (pac CLI) + trigger-based Dataverse orchestration & write-back |
 
 ## Dataverse Skills
 
