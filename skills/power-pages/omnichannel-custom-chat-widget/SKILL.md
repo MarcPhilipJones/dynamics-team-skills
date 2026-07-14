@@ -10,7 +10,7 @@ description: >
   auth-settings configuration via PowerShell.
   Use when: adding live chat, fixing "visitor" identity, customizing chat UI,
   or troubleshooting Omnichannel SDK on Code Sites with Vite.
-version: 3.0.0
+version: 3.1.0
 author: Marc
 applyTo: "powerpages.config.json,**/powerpages.config.json"
 tags:
@@ -36,6 +36,16 @@ Build a fully custom React chat widget using the lightweight
 with Vite. This replaces the default Microsoft chat widget with a branded,
 customizable experience while preserving authenticated chat so agents see the
 real user identity.
+
+> **Why bundle the SDK instead of the OOB LiveChatWidget bootstrapper?**
+> The code-site CSP restricts `script-src` to `'self'` + `content.powerapps.com`,
+> so the external `oc-cdn…/LiveChatBootstrapper.js` is **blocked** (and you can't
+> edit a code-site's CSP). But the CSP sets **only** `script-src` and `style-src`
+> — there is **no `connect-src`/`default-src`** — so runtime WebSocket/fetch to
+> `*.omnichannelengagementhub.com` is **unrestricted**. Bundling the SDK (which
+> runs from `'self'`) therefore works where the external script cannot. This is
+> the whole reason this skill exists — see also the `embedding-advanced-widget`
+> skill's Omnichannel exception.
 
 ---
 
@@ -183,6 +193,27 @@ export default defineConfig({
 Without both, you get `Cannot find module` or `Missing export` errors in one
 mode or the other.
 
+### Vite 8 / Rolldown note (verified Jul 2026)
+
+On **Vite 8** (Rolldown engine) the build prints a warning that
+`optimizeDeps.esbuildOptions` is deprecated in favour of
+`optimizeDeps.rolldownOptions`. This is **harmless** — the Rollup `enforce: 'pre'`
+`stubAcsAdapter` plugin is what makes `vite build` succeed (the esbuild block only
+affects the dev pre-bundle). The build works: the SDK lands in a `lib-*.js` chunk
+(~880 KB) and, if you lazy-load the widget, it becomes its own small chunk (~8 KB).
+
+**tsc gotcha:** the esbuild `PluginBuild` type isn't resolvable from this config,
+so annotate the callback param as `any` (with an eslint-disable) to satisfy
+`tsc -b`:
+
+```typescript
+plugins: [{
+  name: 'stub-acs-adapter-esbuild',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setup(build: any) { /* … */ },
+}],
+```
+
 ---
 
 ## Step 3 — Omnichannel Config Values
@@ -201,6 +232,30 @@ const OC_CONFIG = {
 You can also extract these from the widget code snippet (the
 `data-org-url`, `data-org-id`, and `data-app-id` attributes on the
 bootstrapper script tag).
+
+### Anonymous chat — demo quickstart (skip Steps 4 & 7)
+
+Most of this skill covers **authenticated** chat (self-signed JWT) so the agent
+sees the real contact. For a **demo**, anonymous chat is far simpler and enough:
+the agent sees a "Visitor", and you pass the caller's name + question via
+`startChat` custom context. **Skip Step 4 (JWT/RSA/jose) and Step 7 (Dataverse
+auth settings) entirely** — you do NOT need `getAuthToken`.
+
+```typescript
+// Anonymous: construct the SDK with config ONLY (no chatSDKConfig).
+const sdk = new OmnichannelChatSDK(OC_CONFIG);
+await sdk.initialize();
+await sdk.startChat({
+  customContext: {
+    Name:     { value: name || 'Website visitor', isDisplayable: true },
+    Question: { value: question,                  isDisplayable: true },
+  },
+});
+```
+
+Everything else (Step 5 UI, post-greeting send, `sdk.sendMessage({ content })`
+object form, error boundary) is identical. When you later need real identity,
+add the Step 4/7 JWT path — no UI changes required.
 
 ---
 

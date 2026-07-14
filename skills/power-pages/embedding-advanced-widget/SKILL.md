@@ -9,7 +9,10 @@ description: >
   templates, and avoiding the CSP disaster of HTTP/Content-Security-Policy
   site settings. Use when: adding any external widget, chat bubble, analytics
   script, or third-party JS to a Power Pages Code Site.
-version: 1.0.0
+  EXCEPTION: for the D365 Omnichannel live chat widget, self-hosting the
+  bootstrapper does NOT work (it pulls further oc-cdn script chunks that stay
+  script-src blocked) -> use the omnichannel-custom-chat-widget skill instead.
+version: 1.1.0
 author: Marc
 applyTo: "powerpages.config.json,**/powerpages.config.json"
 tags:
@@ -38,6 +41,28 @@ without modifying CSP or risking site breakage.
 
 **NEVER modify CSP on Power Pages Code Sites.** Instead, self-host all external
 scripts and assets as Power Pages web files (served from `'self'`).
+
+---
+
+## ⚠️ Exception — D365 Omnichannel live chat widget (DON'T self-host it)
+
+Self-hosting works for *most* external widgets, but **NOT** for the Dynamics 365
+Omnichannel Live Chat Widget (the `oc-cdn…/LiveChatBootstrapper.js` script).
+Even if you self-host the bootstrapper, at runtime it loads **further script
+chunks from `oc-cdn`** which the code-site `script-src` still blocks — so the
+chat never loads. Self-hosting is a dead end here.
+
+**Instead, use the [`omnichannel-custom-chat-widget`](../omnichannel-custom-chat-widget/SKILL.md)
+skill:** bundle `@microsoft/omnichannel-chat-sdk` (runs from `'self'`, allowed by
+`script-src`) behind a custom React UI. The code-site CSP sets only `script-src`
+and `style-src` — there is **no `connect-src`/`default-src`** — so the SDK's
+runtime WebSocket/fetch to `*.omnichannelengagementhub.com` is unrestricted and
+the bundled SDK just works.
+
+| Task | Skill |
+|---|---|
+| Analytics tag, generic chat bubble, arbitrary third-party JS | **this skill** (self-host) |
+| D365 Omnichannel live chat | **omnichannel-custom-chat-widget** (bundled SDK) |
 
 ---
 
