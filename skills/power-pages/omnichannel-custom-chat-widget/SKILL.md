@@ -9,8 +9,9 @@ description: >
   boundaries, RSA key pair generation, jose library JWT signing, and Dataverse
   auth-settings configuration via PowerShell.
   Use when: adding live chat, fixing "visitor" identity, customizing chat UI,
-  or troubleshooting Omnichannel SDK on Code Sites with Vite.
-version: 3.0.0
+  rendering knowledge-article citations as clickable links, or troubleshooting
+  Omnichannel SDK on Code Sites with Vite.
+version: 3.2.0
 author: Marc
 applyTo: "powerpages.config.json,**/powerpages.config.json"
 tags:
@@ -37,6 +38,16 @@ with Vite. This replaces the default Microsoft chat widget with a branded,
 customizable experience while preserving authenticated chat so agents see the
 real user identity.
 
+> **Why bundle the SDK instead of the OOB LiveChatWidget bootstrapper?**
+> The code-site CSP restricts `script-src` to `'self'` + `content.powerapps.com`,
+> so the external `oc-cdn…/LiveChatBootstrapper.js` is **blocked** (and you can't
+> edit a code-site's CSP). But the CSP sets **only** `script-src` and `style-src`
+> — there is **no `connect-src`/`default-src`** — so runtime WebSocket/fetch to
+> `*.omnichannelengagementhub.com` is **unrestricted**. Bundling the SDK (which
+> runs from `'self'`) therefore works where the external script cannot. This is
+> the whole reason this skill exists — see also the `embedding-advanced-widget`
+> skill's Omnichannel exception.
+
 ---
 
 ## Table of Contents
@@ -56,6 +67,7 @@ real user identity.
 13. [Design Token Reference](#design-token-reference)
 14. [Custom Context Variables (Agent Toast Notifications)](#custom-context-variables-agent-toast-notifications)
 15. [End-to-End Setup Checklist](#end-to-end-setup-checklist)
+16. [Knowledge-Article Citations & Copilot Studio Citation Chrome](#knowledge-article-citations--copilot-studio-citation-chrome)
 
 ---
 
@@ -183,6 +195,27 @@ export default defineConfig({
 Without both, you get `Cannot find module` or `Missing export` errors in one
 mode or the other.
 
+### Vite 8 / Rolldown note (verified Jul 2026)
+
+On **Vite 8** (Rolldown engine) the build prints a warning that
+`optimizeDeps.esbuildOptions` is deprecated in favour of
+`optimizeDeps.rolldownOptions`. This is **harmless** — the Rollup `enforce: 'pre'`
+`stubAcsAdapter` plugin is what makes `vite build` succeed (the esbuild block only
+affects the dev pre-bundle). The build works: the SDK lands in a `lib-*.js` chunk
+(~880 KB) and, if you lazy-load the widget, it becomes its own small chunk (~8 KB).
+
+**tsc gotcha:** the esbuild `PluginBuild` type isn't resolvable from this config,
+so annotate the callback param as `any` (with an eslint-disable) to satisfy
+`tsc -b`:
+
+```typescript
+plugins: [{
+  name: 'stub-acs-adapter-esbuild',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setup(build: any) { /* … */ },
+}],
+```
+
 ---
 
 ## Step 3 — Omnichannel Config Values
@@ -201,6 +234,30 @@ const OC_CONFIG = {
 You can also extract these from the widget code snippet (the
 `data-org-url`, `data-org-id`, and `data-app-id` attributes on the
 bootstrapper script tag).
+
+### Anonymous chat — demo quickstart (skip Steps 4 & 7)
+
+Most of this skill covers **authenticated** chat (self-signed JWT) so the agent
+sees the real contact. For a **demo**, anonymous chat is far simpler and enough:
+the agent sees a "Visitor", and you pass the caller's name + question via
+`startChat` custom context. **Skip Step 4 (JWT/RSA/jose) and Step 7 (Dataverse
+auth settings) entirely** — you do NOT need `getAuthToken`.
+
+```typescript
+// Anonymous: construct the SDK with config ONLY (no chatSDKConfig).
+const sdk = new OmnichannelChatSDK(OC_CONFIG);
+await sdk.initialize();
+await sdk.startChat({
+  customContext: {
+    Name:     { value: name || 'Website visitor', isDisplayable: true },
+    Question: { value: question,                  isDisplayable: true },
+  },
+});
+```
+
+Everything else (Step 5 UI, post-greeting send, `sdk.sendMessage({ content })`
+object form, error boundary) is identical. When you later need real identity,
+add the Step 4/7 JWT path — no UI changes required.
 
 ---
 
@@ -1110,3 +1167,104 @@ The widget references these CSS variables (with fallback values):
 > **Key takeaway:** When building a new chat widget, implement ALL 10 features above
 > as standard. They add ~12 KB gzipped to the lazy-loaded chunk and dramatically
 > improve the UX over a bare chat panel.
+
+---
+
+## Knowledge-Article Citations & Copilot Studio Citation Chrome
+
+> **Added v3.2.0 (verified Jul 2026).** When a Copilot Studio agent answers from a
+> knowledge source, its **built-in citation chrome leaks into the message `content`**
+> as **Private-Use-Area Unicode markers** (`U+E000`–`U+F8FF`) wrapping a citation
+> title whose spaces are replaced by `~`. A custom widget that renders `content` as
+> text shows those markers as **“tofu” boxes**, e.g.:
+>
+> ```text
+> …treat it as an emergency⬛cite⬛Reporting~a~suspected~burst~water~main~or~street~leak⬛.
+> ```
+>
+> The public URL is **not** in the inline text. Fixing this needs **both** the widget
+> and the agent.
+
+### A. Widget — safe link rendering (preferred over `dangerouslySetInnerHTML`)
+
+Render agent/system messages through a helper that (1) strips citation chrome,
+(2) rewrites internal CRM article URLs to the public portal article page, and
+(3) builds **real React `<a>` elements** (no `innerHTML`, `http(s)` only — XSS-safe).
+User messages stay plain text.
+
+```tsx
+import { type ReactNode } from 'react';
+
+function renderMessageContent(raw: string): ReactNode {
+    if (!raw) return raw;
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const text = raw
+        // 1) strip C0/C1 control chars (keep \t \n) + Private-Use-Area citation markers
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uE000-\uF8FF]/g, '')
+        // 2) internal D365 article URL -> public portal page (HashRouter /knowledge/:id route)
+        .replace(
+            /https?:\/\/[^\s)]*dynamics\.com[^\s)]*[?&]articleId=([0-9a-fA-F-]{36})[^\s)]*/gi,
+            (_m, id) => `${origin}/#/knowledge/${id}`,
+        );
+    // 3) parse Markdown links [title](url) AND bare URLs into real anchors
+    const re = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s)]+)/g;
+    const nodes: ReactNode[] = [];
+    let last = 0, key = 0, m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+        if (m.index > last) nodes.push(text.slice(last, m.index));
+        const url = m[2] ?? m[3]!;
+        nodes.push(
+            <a key={`lnk-${key++}`} href={url} target="_blank"
+               rel="noopener noreferrer" className="cw-chat__link">{m[1] ?? url}</a>,
+        );
+        last = re.lastIndex;
+    }
+    if (last < text.length) nodes.push(text.slice(last));
+    return nodes.length ? nodes : text;
+}
+```
+
+```css
+.cw-chat__link { color: var(--chat-accent, #1273d4); font-weight: 600;
+    text-decoration: underline; word-break: break-word; }
+.cw-chat__msg--user .cw-chat__link { color: #fff; }
+```
+
+> Feature 6 (Markdown Rendering) uses `dangerouslySetInnerHTML`. For links,
+> **prefer the React-element approach above** — it avoids `innerHTML` entirely and
+> is inherently XSS-safe (only `http(s)` anchors are ever emitted). The PUA/control
+> strip is defensive: even if the agent still leaks citation chrome, no tofu shows.
+
+### B. Agent — emit a real Markdown link, forbid built-in citations
+
+In the Copilot Studio agent's GPT instructions (botcomponent `*.gpt.default` `data`
+YAML), tell the model to cite as a plain Markdown link and to suppress the
+auto-citation chrome. Publish with `pac copilot publish --bot <botid>`:
+
+> At the very end of your reply, add a new line linking the source as a Markdown
+> link **exactly** in this form: `[ARTICLE TITLE](ARTICLE URL)`, using the full
+> `https` URL returned by the tool. Do **NOT** use automatic or inline citations,
+> citation markers, footnote numbers like `[1]`, tildes, or any special characters
+> — only the plain Markdown link.
+
+Firmly forbidding the built-in citation is what stops the PUA/`~` chrome; the widget
+then turns `[title](url)` into a clean, clickable, new-tab link.
+
+### C. Inspecting raw bot output
+
+Copilot Studio transcripts live in the Dataverse `conversationtranscript` table
+(`content` = JSON; `isDesignMode` = `true` for the test pane, `false` for a live
+channel). Query it to see the exact bytes the model emitted when debugging citation
+formatting.
+
+### D. Launcher clipping the site footer
+
+On some portals the FAB sits on top of the site's dark footer bar. Raise the
+container: `.cw-chat { bottom: 40px; }` (mobile `bottom: 28px;`) so the launcher
+clears the footer.
+
+> **Key takeaway:** Copilot Studio's knowledge citations are **not** plain text —
+> they arrive as Private-Use-Area Unicode + `~`-encoded titles. Strip that chrome in
+> the widget, rewrite internal article URLs to the public portal page, render links
+> as React `<a>` elements (not `innerHTML`), and instruct the agent to emit a plain
+> `[title](url)` link with no built-in citations.
