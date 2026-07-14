@@ -1,5 +1,5 @@
 ---
-name: teams-phone-cs-setup
+name: power-platform-teams-phone-cs-setup
 description: >
   Provision a Microsoft Teams Calling Plan phone number for the Dynamics 365
   Customer Service / Contact Center voice channel — end to end, from
