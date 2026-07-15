@@ -17,6 +17,8 @@ tags:
 
 # Knowledge Base Article Management
 
+> **v1.1.0 — Added create-time gotchas: don't set language on create, use the Web API (not the Dataverse MCP), the publish-fork root/latest-version behaviour, and PS7 error visibility (July 2026)**
+
 > **Trigger**: "Set up knowledge base articles" or "Integrate KB articles"
 
 Manage Dataverse `knowledgearticle` records: create, update, publish, and
