@@ -5,7 +5,7 @@ description: >
   "manage knowledge base", "publish articles", or "integrate knowledge articles".
   Handles the knowledgearticle table lifecycle: CRUD, article states, Web API
   exposure, and frontend integration.
-version: 1.0.0
+version: 1.1.0
 author: Marc
 tags:
   - power-platform
@@ -16,6 +16,8 @@ tags:
 ---
 
 # Knowledge Base Article Management
+
+> **v1.1.0 — Added create-time gotchas: don't set language on create, use the Web API (not the Dataverse MCP), the publish-fork root/latest-version behaviour, and PS7 error visibility (July 2026)**
 
 > **Trigger**: "Set up knowledge base articles" or "Integrate KB articles"
 
@@ -74,6 +76,20 @@ $article = @{
 $result = Invoke-RestMethod -Uri "$envUrl/api/data/v9.2/knowledgearticles" `
   -Headers $headers -Method Post -Body $article
 ```
+
+> **Do NOT set the language on create.** Adding
+> `languagelocaleid@odata.bind` fails with `ODataUnrecognizedPathException:
+> Resource not found for the segment 'languagelocales'`. Omit it entirely and
+> the article auto-assigns the org default language (e.g. English UK). Set the
+> language later via the form if you need a non-default locale.
+>
+> **Create via the Web API, not the Dataverse MCP.** `create_record` chokes on
+> `languagelocaleid` (it parses the GUID as a number and returns 400). Use the
+> OData POST above for reliable KB creation.
+
+> **See the actual error.** In PowerShell 7, `Invoke-RestMethod` surfaces only a
+> generic `400 (Bad Request)`. Wrap calls in `try { ... } catch {
+> Write-Host $_.ErrorDetails.Message }` to read the real OData error body.
 
 ### Phase 3: Publish Articles
 
@@ -215,8 +231,23 @@ Create a knowledge base page that:
 
 - **Primary key in fields list** -- `knowledgearticleid` MUST be in the
   `Webapi/knowledgearticle/fields` setting or you get 403 errors.
-- **Filter for published only** -- Always filter `statecode eq 3` in portal
-  queries to avoid showing draft/archived articles.
+- **Filter for published only** -- Always filter `statecode eq 3 and
+  islatestversion eq true` in portal queries to avoid showing draft/archived
+  articles *and* to return exactly one record per article (see the fork note below).
+- **Publishing forks the record into two** -- After Approve -> Publish, the
+  platform splits the article into a **root** record (`isrootarticle=true`, stays
+  Draft) and a separate **published latest version** (`isrootarticle=false`,
+  `islatestversion=true`, `statecode=3`). Consequences: (1) portal/list queries
+  must filter `islatestversion eq true` or you get duplicates; (2) anything that
+  references the **root** article -- e.g. linking to a Customer Intent Agent
+  intent via `msdyn_rootknowledgearticleid` -- must use the `isrootarticle=true`
+  id, **not** the published version id.
+- **Language / MCP / error visibility on create** -- Do not set
+  `languagelocaleid` on create (entity set `languagelocales` doesn't exist ->
+  `ODataUnrecognizedPathException`); omit it and the org default is assigned.
+  The Dataverse MCP `create_record` can't create KB articles (parses the language
+  GUID as a number -> 400) -- use the Web API. In PS7, read real errors with
+  `catch { Write-Host $_.ErrorDetails.Message }`.
 - **HTML content rendering** -- Article `content` field contains HTML. Use
   `dangerouslySetInnerHTML` in React (sanitize first!) or a sanitization library.
 - **State transitions** -- You cannot jump directly from Draft to Published.
