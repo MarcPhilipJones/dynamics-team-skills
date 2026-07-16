@@ -1,0 +1,10 @@
+{
+    "name": "translate-proxy",
+    "version": "1.0.0",
+    "description": "SFI-durable proxy: client -> Azure Function (managed identity) -> Azure Translator via Entra ID. Keeps the Translator key out of the client.",
+    "main": "src/functions/*.js",
+    "dependencies": {
+        "@azure/functions": "^4.5.0",
+        "@azure/identity": "^4.4.1"
+    }
+}

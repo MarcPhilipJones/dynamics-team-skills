@@ -92,6 +92,7 @@ author: Marc
 | Skill | Trigger Phrases | Description |
 |---|---|---|
 | [conditional-access-arm-mfa](azure/conditional-access-arm-mfa/SKILL.md) | "AADSTS50158", "AADSTS50076", "az login MFA", "device code MFA fails", "ARM vs Kudu auth" | When and why ARM writes need MFA-capable auth while Kudu/SCM ZIP deploys don't — with auth-method decision matrix |
+| [translator-managed-identity-auth](azure/translator-managed-identity-auth/SKILL.md) | "set up authentication for Translator", "fix real-time translation", "translation provider setup error", "Translator API key disabled", "keyless Azure Translator", "SFI broke translation" | Rebuild a broken key-based Azure Translator integration (Omnichannel/CCaaS real-time translation) as an SFI-durable **Azure Function + Managed Identity proxy** authenticating via **Entra ID** — no key in the browser. **Self-contained**: bundles the Function source + idempotent `provision.ps1` (clean-room-validated end-to-end + keyless deploy + verify) + `teardown.ps1` + `deploy-webresource.ps1`. Covers the transparent-proxy design, the custom-domain vs 401001 gotcha, identity-based storage hardening, keyless `func` one-deploy, cost, key rotation + security warnings |
 
 ## Typical Workflow Order
 
