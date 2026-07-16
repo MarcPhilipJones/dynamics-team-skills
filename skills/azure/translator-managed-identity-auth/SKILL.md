@@ -13,11 +13,9 @@ author: Marc Jones / UK Dynamics SE team
 tags:
   - azure
   - translator
-  - cognitive-services
   - managed-identity
   - entra-id
   - sfi
-  - omnichannel
   - security
 ---
 

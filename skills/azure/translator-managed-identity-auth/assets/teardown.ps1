@@ -8,8 +8,8 @@
   Run against the correct subscription/tenant. Destructive - review before running.
 
 .EXAMPLE
-  ./teardown.ps1 -Subscription <subId> -Rg MJ_AzureFunctions -FunctionApp yw-translate-proxy `
-    -Storage ywtranslateproxysa -TranslatorName mjglobaltranslate -TranslatorRg MJ_Resources -DeleteStorage
+  ./teardown.ps1 -Subscription <subId> -Rg rg-<project> -FunctionApp <project>-translate-proxy `
+    -Storage <project>translateproxysa -TranslatorName <project>-translator -TranslatorRg rg-<project> -DeleteStorage
 #>
 [CmdletBinding(SupportsShouldProcess)]
 param(

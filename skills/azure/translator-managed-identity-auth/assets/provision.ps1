@@ -15,10 +15,10 @@
   - An existing Azure Translator (TextTranslation) resource WITH a custom subdomain.
 
 .EXAMPLE
-  ./provision.ps1 -Subscription <subId> -Rg MJ_AzureFunctions -FunctionApp yw-translate-proxy `
-    -Storage ywtranslateproxysa -Region ukwest `
-    -TranslatorName mjglobaltranslate -TranslatorRg MJ_Resources `
-    -ClientOrigin https://org6cb3e9fb.crm4.dynamics.com -ProjectDir ./function
+  ./provision.ps1 -Subscription <subId> -Rg rg-<project> -FunctionApp <project>-translate-proxy `
+    -Storage <project>translateproxysa -Region ukwest `
+    -TranslatorName <project>-translator -TranslatorRg rg-<project> `
+    -ClientOrigin https://<your-org>.crm.dynamics.com -ProjectDir ./function
 #>
 [CmdletBinding()]
 param(
